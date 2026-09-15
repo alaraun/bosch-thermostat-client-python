@@ -3,7 +3,7 @@ import pytest
 from unittest.mock import MagicMock
 from aiohttp import ClientSession
 from bosch_thermostat_client.connectors import HttpConnector
-from bosch_thermostat_client.errors import Response404Error, RequestError, ResponseError
+from bosch_thermostat_client.exceptions import DeviceConnectionError, DeviceException
 from .gateway_test_server import GatewayTestServer
 
 TIMEOUT = 2
@@ -40,8 +40,10 @@ async def test_request_notfound():
             request = await server.receive_request()
             assert request.path_qs == "/blablabla"
             server.send_response(request, status=404)
-            with pytest.raises(Response404Error):
+            # A missing endpoint is a plain DeviceException, not a connection failure.
+            with pytest.raises(DeviceException) as caught:
                 await task
+            assert not isinstance(caught.value, DeviceConnectionError)
 
 
 @pytest.mark.asyncio
@@ -70,5 +72,3 @@ async def test_request_forbidden():
             server.send_response(request, status=403)
             with pytest.raises(DeviceException): # Connector wraps ResponseException in DeviceException
                 await task
-
-from bosch_thermostat_client.exceptions import DeviceException

@@ -1,6 +1,5 @@
 """XMPP Connector to talk to bosch."""
 
-import itertools
 import ssl
 from pathlib import Path
 
@@ -27,7 +26,6 @@ class EasycontrolConnector(XMPPBaseConnector):
     device_type = EASYCONTROL
 
     def __init__(self, host, encryption, **kwargs):
-        self._seqno = itertools.count(0)
         ssl_ctx = kwargs.get("ssl_context")
         if not ssl_ctx:
             ssl_ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)

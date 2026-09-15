@@ -1,6 +1,4 @@
 """XMPP Connector to talk to bosch."""
-import itertools
-
 from bosch_thermostat_client.const import PUT, GET, USER_AGENT, CONTENT_TYPE, APP_JSON
 from bosch_thermostat_client.const.ivt import TELEHEATER, IVT
 from .xmpp import XMPPBaseConnector
@@ -25,7 +23,6 @@ class IVTXMPPConnector(XMPPBaseConnector):
             access_key (str): access key to bosch
             encryption (obj): Encryption object
         """
-        self._seqno = itertools.count(1)
         super().__init__(host=host, access_key=access_key, encryption=encryption, **kwargs)
 
     def _build_message(self, method, path, data=None, seq_no=0) -> str:

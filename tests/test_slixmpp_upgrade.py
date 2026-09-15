@@ -11,6 +11,7 @@ import inspect
 import slixmpp
 from unittest.mock import MagicMock, patch
 import pytest
+from packaging.version import Version
 
 from bosch_thermostat_client.connectors.client.slixmpp010 import BoschClientXMPP
 from bosch_thermostat_client.connectors.xmpp import XMPPBaseConnector
@@ -18,8 +19,8 @@ from bosch_thermostat_client.connectors.ivt import IVTXMPPConnector
 
 
 def test_slixmpp_version():
-    """Verify that slixmpp 1.14.1 is installed in the environment."""
-    assert slixmpp.__version__ == "1.14.1"
+    """Verify that the installed slixmpp meets the floor declared in pyproject.toml."""
+    assert Version(slixmpp.__version__) >= Version("1.14.1")
 
 
 def test_force_starttls_enabled():
