@@ -5,15 +5,13 @@ import json
 from asyncio import TimeoutError as AsyncTimeout
 from aiohttp.client_exceptions import (
     ClientResponseError,
-    ClientConnectionError,
+    ClientConnectorError,
     ClientError,
 )
 
 from bosch_thermostat_client.const.ivt import HTTP_HEADER, IVT
 from bosch_thermostat_client.const import APP_JSON, GET, PUT
-from bosch_thermostat_client.exceptions import (
-    DeviceConnectionError, DeviceException, ResponseException,
-)
+from bosch_thermostat_client.exceptions import DeviceException, ResponseException
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -56,15 +54,19 @@ class HttpConnector:
             async with method(self._format_url(path), **kwargs) as res:
                 return await get_response(method.__name__, res)
         except ClientResponseError as err:
+            if err.status == 404:
+                from bosch_thermostat_client.errors import Response404Error
+
+                raise Response404Error(f"URI {path} doesn not exist: {err}")
             raise DeviceException(f"URI {path} doesn not exist: {err}")
-        except ClientConnectionError as err:
-            raise DeviceConnectionError(err) from err
+        except ClientConnectorError as err:
+            raise DeviceException(err)
         except ResponseException as err:
             raise DeviceException(f"Error requesting data from {path}: {err}")
         except ClientError as err:
             raise DeviceException(f"Error connecting to client {path}: {err}")
-        except AsyncTimeout as err:
-            raise DeviceConnectionError(f"Connection timed out for {path}.") from err
+        except AsyncTimeout:
+            raise DeviceException(f"Connection timed out for {path}.")
 
     def _format_url(self, path):
         """Format URL to make requests to gateway."""
@@ -73,6 +75,10 @@ class HttpConnector:
     def set_timeout(self, timeout=10):
         """Set timeout for API calls."""
         self._request_timeout = timeout
+
+    async def request(self, path):
+        """Request message from API with given path. Backward compatibility for tests."""
+        return await self.get(path)
 
     async def get(self, path):
         """Get message from API with given path."""

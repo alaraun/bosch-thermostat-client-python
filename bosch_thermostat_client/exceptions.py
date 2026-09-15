@@ -22,7 +22,7 @@ class DeviceConnectionError(DeviceException):
     """HTTP request failed before a complete response was received."""
 
 
-class MsgException(BoschException):
+class MsgException(DeviceException):
     """
     Invalid request.
 
@@ -33,7 +33,7 @@ class MsgException(BoschException):
     pass
 
 
-class FirmwareException(BoschException):
+class FirmwareException(DeviceException):
     """
     Wrong firmware version.
 
@@ -44,12 +44,12 @@ class FirmwareException(BoschException):
     pass
 
 
-class FailedAuthException(BoschException):
+class FailedAuthException(DeviceException):
     """Failed auth."""
     pass
 
 
-class UnknownDevice(BoschException):
+class UnknownDevice(DeviceException):
     """
     Unknown device.
 
